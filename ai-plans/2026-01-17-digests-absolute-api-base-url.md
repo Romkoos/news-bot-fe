@@ -20,7 +20,7 @@
 - [x] Step 1: Update `entities/digest/api/fetchDigests()` to always use the configured base URL.
 - [x] Step 2: Ensure dev uses Vite proxy by default (to avoid CORS), while non-dev builds use absolute `API_BASE_URL`.
 - [x] Step 3: Verify `npm run lint` and `npm run build`.
-- [ ] Step 4: Commit referencing this plan file and push branch.
+- [x] Step 4: Commit referencing this plan file and push branch.
 
 ## Files to Modify/Create
 
@@ -35,3 +35,11 @@
 ## Rollback Plan
 
 - Revert the commit on this branch.
+
+## Completed
+
+- Date completed: 2026-01-17
+- Deviations:
+  - Instead of forcing absolute URLs in dev (which triggers CORS), we centralized the dev-proxy behavior in `shared/api/fetchJson.ts` so browser requests are same-origin and Vite can proxy them.
+- Follow-ups:
+  - Consider code-splitting if the bundle-size warning becomes a concern.
