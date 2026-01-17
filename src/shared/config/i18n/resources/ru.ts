@@ -38,6 +38,9 @@ export const ru = {
     },
     details: {
       title: 'Детали дайджеста',
+      sections: {
+        sourceItems: 'Материалы',
+      },
       fields: {
         id: 'ID',
         createdAt: 'Создано',

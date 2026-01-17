@@ -14,17 +14,23 @@ function normalizeBaseUrl(value: string): string {
  * Falls back to a default for local dev if env var is missing.
  */
 export function getApiBaseUrl(): string {
-  const raw =
+  const fromEnv =
     (import.meta.env.API_BASE_URL as string | undefined) ??
-    (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-    DEFAULT_API_BASE_URL
+    (import.meta.env.VITE_API_BASE_URL as string | undefined)
+
+  /**
+   * Dev default:
+   * - If no env var is set, prefer the current origin. This keeps requests absolute while still
+   *   allowing the Vite dev proxy to handle CORS-sensitive endpoints.
+   */
+  const raw = fromEnv ?? (import.meta.env.DEV ? window.location.origin : DEFAULT_API_BASE_URL)
 
   try {
     // Validate format early.
 
     new URL(raw)
   } catch {
-    return DEFAULT_API_BASE_URL
+    return import.meta.env.DEV ? window.location.origin : DEFAULT_API_BASE_URL
   }
 
   return normalizeBaseUrl(raw)

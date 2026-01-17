@@ -38,6 +38,9 @@ export const en = {
     },
     details: {
       title: 'Digest details',
+      sections: {
+        sourceItems: 'Source items',
+      },
       fields: {
         id: 'ID',
         createdAt: 'Created at',
