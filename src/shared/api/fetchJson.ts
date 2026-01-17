@@ -19,7 +19,15 @@ export async function fetchJson<T>(
   init?: RequestInit,
   options?: FetchJsonOptions,
 ): Promise<T> {
-  const baseUrl = options?.baseUrl ?? getApiBaseUrl()
+  /**
+   * CORS note (dev):
+   * - Browsers block cross-origin requests unless the backend enables CORS.
+   * - For local development, we use Vite's dev proxy (see `vite.config.ts`) by default,
+   *   so the request is same-origin (`/digests`) and Vite forwards it to the backend.
+   *
+   * Production (or any non-dev build) uses `getApiBaseUrl()` (from `.env`) to build an absolute URL.
+   */
+  const baseUrl = options?.baseUrl ?? (import.meta.env.DEV ? '' : getApiBaseUrl())
   const url = input.startsWith('http')
     ? input
     : `${baseUrl}${input.startsWith('/') ? '' : '/'}${input}`

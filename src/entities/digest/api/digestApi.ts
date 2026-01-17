@@ -46,10 +46,6 @@ function parseDigestList(payload: unknown): DigestDto[] {
  * - Network request.
  */
 export async function fetchDigests(signal?: AbortSignal): Promise<DigestDto[]> {
-  const data = await fetchJson<unknown>(
-    '/digests',
-    { signal },
-    import.meta.env.DEV ? { baseUrl: '' } : undefined,
-  )
+  const data = await fetchJson<unknown>('/digests', { signal })
   return parseDigestList(data)
 }
