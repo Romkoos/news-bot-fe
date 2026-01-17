@@ -13,6 +13,14 @@ alwaysApply: true
 
 Before implementing ANY task, follow this mandatory workflow:
 
+### Step 0: Branch Preparation
+Before starting ANY task:
+1. Create a **new branch** based on `master`
+2. Ensure `master` is **updated to the latest version**
+3. The task branch MUST be created **from the updated `master`**
+
+---
+
 ### Step 1: Research & Context Gathering
 1. Find the relevant documentation in the docs folder at the root of the project.
 2. Identify existing patterns, conventions, and related implementations

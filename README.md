@@ -27,7 +27,7 @@ This app reads the API base URL from:
 Note: in this environment `.env` files are blocked; create `.env` locally if needed:
 
 ```bash
-API_BASE_URL=http://35.237.12.130:8080
+API_BASE_URL=http://35.237.12.130
 ```
 
 ## Architecture (FSD)

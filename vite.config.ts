@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
-const DEFAULT_API_BASE_URL = 'http://35.237.12.130:8080'
+const DEFAULT_API_BASE_URL = 'http://35.237.12.130/api'
 
 function normalizeBaseUrl(value: string): string {
   return value.replace(/\/+$/, '')

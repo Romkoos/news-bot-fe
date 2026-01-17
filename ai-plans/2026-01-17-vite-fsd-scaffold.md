@@ -60,7 +60,7 @@ Create a production-grade Vite app implementing FSD layers (`app`, `pages`, `wid
 - `package.json` - scripts (dev/build/preview/lint/format), deps/devDeps, husky/prepare
 - `vite.config.ts` - aliases, base Vite config
 - `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` - strict TS + path aliases
-- `.env` - `API_BASE_URL=http://35.237.12.130:8080` (user can change)
+- `.env` - `API_BASE_URL=http://35.237.12.130` (user can change)
 - `.eslintrc.*` or `eslint.config.*` - ESLint config
 - `.prettierrc` / `prettier.config.*` - Prettier config
 - `.lintstagedrc.*` - lint-staged config
