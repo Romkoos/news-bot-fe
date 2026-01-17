@@ -1,0 +1,213 @@
+---
+alwaysApply: true
+---
+
+Feature-Sliced Design (FSD) Ruleset
+
+Core Principles
+- The codebase MUST be organized strictly by FSD layers: app, processes, pages, widgets, features, entities, shared.
+- Dependencies MUST flow only from higher layers to lower layers (app → ... → shared). Reverse imports are forbidden.
+- Each slice MUST expose a public API via index.ts (or /index.ts) and all external imports MUST go through that public API.
+- Deep imports across slice boundaries are forbidden (e.g., features/x/ui/Button is forbidden; use features/x).
+- Cross-slice imports within the same layer are forbidden unless explicitly allowed by a shared kernel policy (default: forbidden).
+- Business logic MUST be isolated from UI. UI components MUST not contain domain rules, parsing, or complex transformations.
+
+Layers: Responsibilities and Constraints
+
+app
+- app contains ONLY application initialization and global composition:
+  - providers (store, i18n, theme, router)
+  - global styles
+  - app-level configuration and composition root
+- app MUST NOT contain business logic, feature logic, or entity logic.
+- app MAY import from any lower layer.
+
+processes
+- processes contains ONLY long-running or cross-page flows:
+  - auth flow, onboarding flow, payment flow, multi-step wizards spanning routes
+- processes MAY orchestrate features/widgets/pages, but MUST NOT implement domain logic of entities.
+- processes MUST NOT be imported by pages/widgets/features/entities/shared.
+
+pages
+- pages contains ONLY route-level composition.
+- pages MUST NOT contain reusable UI. Any reusable blocks MUST be moved into widgets/features.
+- pages MUST NOT contain domain logic; it may orchestrate widgets and features and do minimal mapping.
+- pages MUST NOT be imported by any other layer.
+
+widgets
+- widgets contains reusable page blocks (layout sections) composed from features/entities/shared.
+- widgets MAY hold local UI state required for presentation, but MUST NOT contain business logic.
+- widgets MUST NOT be imported by pages? Allowed: pages may import widgets; widgets MUST NOT import pages.
+
+features
+- features contains user-facing capabilities (actions) that change state:
+  - “add to cart”, “like”, “filter”, “search”, “share”, “subscribe”
+- A feature MUST have a clear actor + action and MUST be independently usable.
+- features MAY depend on entities/shared. features MUST NOT depend on widgets/pages/processes/app.
+- features MUST NOT contain full-screen layouts or route concerns.
+- features MUST export:
+  - UI entrypoints (components)
+  - model (state, events)
+  - lib (helpers)
+  - api (feature-scoped API calls)
+  via a public API.
+
+entities
+- entities contains domain models and domain UI related to a single entity:
+  - User, Article, Video, Comment, Product, etc.
+- entities MUST own:
+  - types/schemas
+  - entity state (if applicable)
+  - entity-specific UI (small, reusable)
+  - entity API (CRUD, fetchers) that is generic to the entity
+- entities MUST NOT depend on features/widgets/pages/processes/app.
+- entities MUST NOT embed use-cases that belong to a feature (e.g., “like article” belongs to features, not entities).
+
+shared
+- shared contains generic, reusable, domain-agnostic code:
+  - ui kit primitives (Button, Input, Modal)
+  - lib utilities (date, formatters, fp helpers)
+  - api base clients (fetch wrapper, axios instance)
+  - config (env parsing)
+  - constants, types, hooks that are not tied to a domain
+- shared MUST NOT import from any other layer.
+
+Slices and Segments Structure
+
+Slice Rules
+- A slice is a top-level unit inside a layer: features/<sliceName>, entities/<sliceName>, widgets/<sliceName>, etc.
+- Slice names MUST be stable, meaningful, and not reflect implementation details.
+- Slice internals MUST be split by segments:
+  - ui/ (React components)
+  - model/ (state, stores, reducers, events)
+  - api/ (requests, endpoints)
+  - lib/ (pure helpers)
+  - config/ (slice configuration)
+  - types/ (TypeScript types if not in model)
+- Segments are optional, but if a segment exists, it MUST follow the standard naming and placement.
+
+Public API Rules (index.ts)
+- Every slice MUST have an index.ts that re-exports only the intended public surface.
+- External code MUST import from slice root only:
+  - ✅ import { LikeButton } from "features/like-article"
+  - ❌ import { LikeButton } from "features/like-article/ui/LikeButton"
+- The index.ts MUST NOT export internals that couple consumers to implementation details.
+
+Import Policy
+
+Absolute Imports
+- Use path aliases per layer (recommended):
+  - app/..., processes/..., pages/..., widgets/..., features/..., entities/..., shared/...
+- Relative imports are allowed only within the same slice boundary.
+
+Forbidden Imports
+- Deep imports across slice boundaries.
+- Imports from pages or processes in any lower layer.
+- Importing private filesystem paths that are not re-exported by index.ts.
+- shared importing anything outside shared.
+
+Allowed Cross-Slice Usage (Default)
+- pages may import widgets/features/entities/shared.
+- widgets may import features/entities/shared.
+- features may import entities/shared.
+- entities may import shared.
+- shared may import nothing outside shared.
+
+UI Rules
+
+UI Segment (ui/)
+- UI components MUST be presentational by default:
+  - accept props
+  - emit callbacks
+  - minimal local UI state only
+- Business logic MUST live in model/ and be consumed via hooks or adapter functions.
+- UI MUST NOT call raw API clients directly; use api/ segment or use-cases from model.
+
+Container vs Presentational
+- If you need orchestration (data fetching, state wiring), create a container component:
+  - ui/<Component>.tsx may be presentational
+  - ui/<Component>.container.tsx wires model/api
+- Do not mix wiring and rendering in one component unless trivial.
+
+State Management Rules (model/)
+
+Model Segment (model/)
+- model MUST be the only place where slice state is created/owned.
+- UI MUST NOT create duplicated source-of-truth state that belongs to model.
+- Side effects MUST be centralized (e.g., thunks/effects/query handlers), not scattered in UI.
+- model MUST expose stable hooks/selectors/actions via public API.
+
+Derivations
+- Derived data MUST be computed via selectors/memoized helpers, not stored as additional state.
+
+API Rules (api/)
+
+API Segment (api/)
+- API calls MUST be encapsulated:
+  - features/api for use-case-specific endpoints
+  - entities/api for entity-generic endpoints
+- Do not leak transport details into UI or model. Return domain-safe DTOs or mapped types.
+
+DTO Mapping
+- Raw server DTOs MUST be mapped at the boundary (api/ or model/ lib), not in UI.
+- Entities SHOULD define mapping to entity types if the DTO is entity-centric.
+- Features SHOULD define mapping if the DTO is use-case-specific.
+
+Shared UI Kit Rules (shared/ui)
+
+Shared UI
+- shared/ui MUST contain only domain-agnostic primitives and layout utilities.
+- shared/ui MUST NOT import entities/features/widgets/pages/processes/app.
+
+Theming and i18n
+- Theme tokens and i18n access MUST be provided via app/providers.
+- shared/ui components may consume theme via context only if it remains domain-agnostic.
+- Text in UI MUST come from i18n keys; no hardcoded user-facing strings outside shared constants for system labels.
+
+Testing Rules
+
+Unit Tests
+- Pure logic MUST be tested in lib/ and model/ (selectors, reducers, mappers).
+- UI tests SHOULD focus on behavior of the slice public UI surface, not internal components.
+
+Integration
+- Pages-level tests verify composition and wiring (routing, providers, major flows).
+- Do not snapshot-test deep implementation details; test outcomes.
+
+Refactoring Rules
+
+Move Up, Not Down
+- If a component is reused across pages, move it into widgets/features/shared as appropriate.
+- Do not “reach down” with imports; restructure slices instead.
+
+When to Create a Feature
+- Create a feature if:
+  - it represents a user action with business meaning
+  - it can be reused across contexts
+  - it needs its own model/api/lib boundary
+- Otherwise keep it inside widget/page composition.
+
+When to Create a Widget
+- Create a widget if:
+  - it is a reusable page section composed from multiple features/entities
+  - it is layout-heavy and reused or expected to be reused
+
+Naming Conventions
+
+Slices
+- Use kebab-case for slice folders: features/like-article, entities/user, widgets/header.
+- Export names MUST be PascalCase for components and camelCase for functions/hooks.
+
+Files
+- ui components: <Component>.tsx
+- containers/adapters: <Component>.container.tsx
+- hooks: use<Something>.ts
+- types: types.ts or *.types.ts (consistent within slice)
+- mappers: map<From>To<To>.ts
+
+Enforcement Checklist (Must Pass)
+- No forbidden imports (layering + deep imports).
+- Every slice has a public API (index.ts) and all consumers use it.
+- Pages contain only composition; no reusable blocks or domain logic.
+- Features own use-cases; entities own domain model; shared owns primitives/utilities.
+- Business logic is not embedded in UI.

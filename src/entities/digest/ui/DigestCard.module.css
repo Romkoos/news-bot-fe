@@ -1,0 +1,15 @@
+.card {
+  width: 100%;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.text {
+  margin: 0;
+  white-space: pre-wrap;
+}

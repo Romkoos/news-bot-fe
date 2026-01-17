@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+---
+UI and Styling
+
+- Apply composition patterns to create modular, reusable components.
+
+Styling Guidelines
+- Use CSS modules for styling
+- Design with mobile-first, responsive principles for flexibility
+  across devices.
+- Maintain consistent spacing values to establish visual harmony.
+- Define CSS variables for theme colors and spacing to support easy
+  theming and maintainability.
+
+Additional Practices
+- Prefer design tokens over hard-coded values; centralize spacing,
+  color, and typography scales.
+- Provide accessible focus-visible styles; avoid removing outlines
+  without a replacement.
+- Use logical properties (margin-inline, padding-block) to support RTL
+  and localization.
+- Favor flex/grid layouts over absolute positioning; avoid `!important`
+  and deep selectors that hinder overrides.

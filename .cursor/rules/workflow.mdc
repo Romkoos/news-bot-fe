@@ -1,0 +1,87 @@
+---
+alwaysApply: true
+---
+
+# Workflow Rules
+
+## Project Context
+- Framework: Next.js
+- Documentation: 
+   - In the root of the project, in the docs folder.
+
+## Task Execution Workflow
+
+Before implementing ANY task, follow this mandatory workflow:
+
+### Step 1: Research & Context Gathering
+1. Find the relevant documentation in the docs folder at the root of the project.
+2. Identify existing patterns, conventions, and related implementations
+3. Note any constraints or requirements from the documentation
+
+### Step 2: Create Implementation Plan
+1. Create a plan file in `ai-plans/` folder with the naming convention:
+   ```
+   ai-plans/YYYY-MM-DD-<short-task-description>.md
+   ```
+
+2. The plan file MUST include:
+   ```markdown
+   # Task: [Brief Title]
+   
+   ## Context
+   - Ticket/Request: [reference if available]
+   
+   ## Objective
+   [Clear description of what needs to be accomplished]
+   
+   ## Technical Approach
+   [High-level approach and architecture decisions]
+   
+   ## Implementation Steps
+   - [ ] Step 1: [description]
+   - [ ] Step 2: [description]
+   - [ ] Step 3: [description]
+   ...
+   
+   ## Files to Modify/Create
+   - `path/to/file.ts` - [what changes]
+   - `path/to/new-file.ts` - [purpose]
+   
+   ## Testing Strategy (if needed)
+   - [ ] [Test case 1]
+   - [ ] [Test case 2]
+   
+   ## Rollback Plan
+   [How to revert if needed]
+   
+   ## Open Questions
+   - [Any uncertainties to clarify]
+   ```
+
+3. Present the plan to the user for approval before proceeding
+
+### Step 3: Implementation
+1. Only proceed after user approves the plan
+2. Do only one step on time and wait until user approve till the new step
+3. Update checkboxes in the plan file as you complete each step
+4. Commit messages should reference the plan file
+
+### Step 4: Completion
+1. Mark all todos as complete in the plan file
+2. Add a `## Completed` section with:
+   - Date completed
+   - Any deviations from original plan
+   - Follow-up items if any
+
+## Documentation
+1. Search for relevant documentation in the docs folder at the root of the project.
+3. After making any changes to the code, review the documentation and update it if necessary.
+
+
+## Commands
+
+- Before any feature work: "Let me check documentation and create a plan"
+- To view current plan: Reference the latest file in `ai-plans/`
+- To update progress: Edit the checkboxes in the active plan file
+- Every time you make changes, make sure that support for multiple languages is taken into account.
+- Every time you make changes, make sure that support for both dark and light themes is taken into account.
