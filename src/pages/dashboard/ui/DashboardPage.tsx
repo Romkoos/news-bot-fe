@@ -3,7 +3,8 @@ import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DigestCardList, useDigestStore } from 'entities/digest'
+import { useDigestStore } from 'entities/digest'
+import { DigestListWithDetails } from 'widgets/digest-list-with-details'
 
 export function DashboardPage(): ReactElement {
   const { t } = useTranslation()
@@ -55,7 +56,7 @@ export function DashboardPage(): ReactElement {
         {t('nav.dashboard')}
       </Typography.Title>
 
-      <DigestCardList items={items} />
+      <DigestListWithDetails items={items} />
     </div>
   )
 }

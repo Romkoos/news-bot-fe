@@ -45,6 +45,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        '/news-items': {
+          target: apiBaseUrl,
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
   }

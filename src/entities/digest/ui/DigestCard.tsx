@@ -1,31 +1,36 @@
 import { InfoCircleOutlined } from '@ant-design/icons'
-import { Button, Card, Descriptions, Drawer, Tag, Typography } from 'antd'
+import { Button, Card, Tag, Typography } from 'antd'
 import type { ReactElement } from 'react'
-import { useState } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { DigestDto } from '../types'
 
 import styles from './DigestCard.module.css'
 
-import { formatDateTime, unescapeText, parseMarkdownLinks } from 'shared/lib'
+import { parseMarkdownLinks, unescapeText } from 'shared/lib'
 
 export interface DigestCardProps {
   readonly item: DigestDto
+  /**
+   * Called when the user clicks the info icon.
+   *
+   * This is intended to be wired by a higher layer (feature/widget) that owns
+   * side effects and dialog state.
+   */
+  readonly onInfoClick?: (item: DigestDto) => void
 }
 
 export function DigestCard(props: DigestCardProps): ReactElement {
-  const { item } = props
+  const { item, onInfoClick } = props
   const { t } = useTranslation()
-  const [detailsOpen, setDetailsOpen] = useState(false)
 
-  const dash = t('common.notAvailable')
   const digestText = unescapeText(item.digest_text)
   const digestTokens = parseMarkdownLinks(digestText)
 
-  const createdAt = formatDateTime(item.created_at) ?? dash
-  const updatedAt = formatDateTime(item.updated_at) ?? dash
-  const publishedAt = formatDateTime(item.published_at) ?? dash
+  const handleInfoClick = useCallback((): void => {
+    onInfoClick?.(item)
+  }, [item, onInfoClick])
 
   return (
     <Card
@@ -35,7 +40,7 @@ export function DigestCard(props: DigestCardProps): ReactElement {
         <Button
           type="text"
           icon={<InfoCircleOutlined />}
-          onClick={() => setDetailsOpen(true)}
+          onClick={handleInfoClick}
           aria-label={t('digest.actions.info')}
         />
       }
@@ -66,38 +71,6 @@ export function DigestCard(props: DigestCardProps): ReactElement {
           return <span key={idx}>{token.text}</span>
         })}
       </Typography.Paragraph>
-
-      <Drawer
-        open={detailsOpen}
-        onClose={() => setDetailsOpen(false)}
-        placement="bottom"
-        height="70%"
-        title={t('digest.details.title')}
-        extra={
-          <Button onClick={() => setDetailsOpen(false)} type="text">
-            {t('common.close')}
-          </Button>
-        }
-      >
-        <Descriptions size="small" column={1} bordered>
-          <Descriptions.Item label={t('digest.details.fields.id')}>{item.id}</Descriptions.Item>
-          <Descriptions.Item label={t('digest.details.fields.createdAt')}>
-            <Typography.Text code>{createdAt}</Typography.Text>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('digest.details.fields.updatedAt')}>
-            <Typography.Text code>{updatedAt}</Typography.Text>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('digest.details.fields.publishedAt')}>
-            <Typography.Text code>{publishedAt}</Typography.Text>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('digest.details.fields.llmModel')}>
-            <Typography.Text code>{item.llm_model ?? dash}</Typography.Text>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('digest.details.fields.sourceItemIdsJson')}>
-            <Typography.Text code>{item.source_item_ids_json}</Typography.Text>
-          </Descriptions.Item>
-        </Descriptions>
-      </Drawer>
     </Card>
   )
 }

@@ -1,6 +1,6 @@
 import type { DigestDto } from '../types'
 
-import { fetchJson } from 'shared/api'
+import { fetchJson, getApiBaseUrl } from 'shared/api'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -46,6 +46,8 @@ function parseDigestList(payload: unknown): DigestDto[] {
  * - Network request.
  */
 export async function fetchDigests(signal?: AbortSignal): Promise<DigestDto[]> {
-  const data = await fetchJson<unknown>('/digests', { signal })
+  const baseUrl = getApiBaseUrl()
+  const url = `${baseUrl}/digests`
+  const data = await fetchJson<unknown>(url, { signal })
   return parseDigestList(data)
 }
