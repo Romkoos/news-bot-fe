@@ -11,8 +11,28 @@ export const en = {
   nav: {
     dashboard: 'Dashboard',
     filters: 'Filters',
+    llm: 'LLM',
     settings: 'Settings',
     menu: 'Menu',
+  },
+  llmConfig: {
+    title: 'LLM config',
+    fields: {
+      model: 'Model',
+      instructions: 'Instructions',
+      updatedAt: 'Updated at',
+    },
+    actions: {
+      save: 'Save',
+    },
+    validation: {
+      modelRequired: 'Please select a model.',
+      instructionsRequired: 'Please enter instructions.',
+    },
+    messages: {
+      saved: 'Saved.',
+      saveFailed: 'Failed to save.',
+    },
   },
   settings: {
     theme: 'Theme',
