@@ -1,5 +1,5 @@
-// const DEFAULT_API_BASE_URL = 'http://35.237.12.130/api'
-const DEFAULT_API_BASE_URL = 'http://localhost:3000/api'
+const DEFAULT_API_BASE_URL = 'http://35.237.12.130/api'
+// const DEFAULT_API_BASE_URL = 'http://localhost:3000/api'
 
 function normalizeBaseUrl(value: string): string {
   return value.replace(/\/+$/, '')
