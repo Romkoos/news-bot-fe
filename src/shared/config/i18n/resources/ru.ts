@@ -11,8 +11,28 @@ export const ru = {
   nav: {
     dashboard: 'Дашборд',
     filters: 'Фильтры',
+    llm: 'LLM',
     settings: 'Настройки',
     menu: 'Меню',
+  },
+  llmConfig: {
+    title: 'Настройки LLM',
+    fields: {
+      model: 'Модель',
+      instructions: 'Инструкции',
+      updatedAt: 'Обновлено',
+    },
+    actions: {
+      save: 'Сохранить',
+    },
+    validation: {
+      modelRequired: 'Выберите модель.',
+      instructionsRequired: 'Введите инструкции.',
+    },
+    messages: {
+      saved: 'Сохранено.',
+      saveFailed: 'Не удалось сохранить.',
+    },
   },
   settings: {
     theme: 'Тема',

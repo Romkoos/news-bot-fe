@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
 const DEFAULT_API_BASE_URL = 'http://35.237.12.130/api'
+//const DEFAULT_API_BASE_URL = 'http://localhost:3000/api'
 
 function normalizeBaseUrl(value: string): string {
   return value.replace(/\/+$/, '')
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => {
   const apiBaseUrl = normalizeBaseUrl(
     env.API_BASE_URL || env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL,
   )
+  // `apiBaseUrl` includes `/api` and is used as the proxy target for endpoints below.
 
   return {
     plugins: [react()],
@@ -46,6 +48,11 @@ export default defineConfig(({ mode }) => {
           secure: false,
         },
         '/news-items': {
+          target: apiBaseUrl,
+          changeOrigin: true,
+          secure: false,
+        },
+        '/llm-config': {
           target: apiBaseUrl,
           changeOrigin: true,
           secure: false,

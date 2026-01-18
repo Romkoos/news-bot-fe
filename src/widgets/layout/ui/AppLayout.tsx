@@ -18,12 +18,15 @@ export function AppLayout(): ReactElement {
     ? '/settings'
     : location.pathname.startsWith('/filters')
       ? '/filters'
-      : '/dashboard'
+      : location.pathname.startsWith('/llm')
+        ? '/llm'
+        : '/dashboard'
 
   const menuItems = useMemo(() => {
     return [
       { key: '/dashboard', label: t('nav.dashboard') },
       { key: '/filters', label: t('nav.filters') },
+      { key: '/llm', label: t('nav.llm') },
       { key: '/settings', label: t('nav.settings') },
     ]
   }, [t])
