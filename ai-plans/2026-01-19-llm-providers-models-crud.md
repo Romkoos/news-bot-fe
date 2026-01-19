@@ -85,7 +85,7 @@ Rationale: cascade delete needs to coordinate both entities; putting that logic 
 - [x] Step 3: Create `entities/llm-model` (types + api + public API)
   - `getModelsByLlmId(llmId)`, `createLlmModel()`, `updateLlmModel()`, `deleteLlmModel()`
   - Runtime DTO shape validation.
-- [ ] Step 4: Create `features/llm-management` store
+- [x] Step 4: Create `features/llm-management` store
   - State: providers list + selected provider id, models list + selected model id, loading/errors for each operation.
   - Actions: loadProviders, selectProvider (loads models), create/delete provider (with cascade), create/delete model, reload models.
 - [ ] Step 5: Update `/llm` page UI to use the new selects
