@@ -46,8 +46,12 @@ function parseDigestList(payload: unknown): DigestDto[] {
  * - Network request.
  */
 export async function fetchDigests(signal?: AbortSignal): Promise<DigestDto[]> {
-  const baseUrl = getApiBaseUrl()
-  const url = `${baseUrl}/digests`
+  /**
+   * In dev, route requests through the Vite proxy to avoid CORS issues.
+   *
+   * See `vite.config.ts` `server.proxy['/digests']`.
+   */
+  const url = import.meta.env.DEV ? '/digests' : `${getApiBaseUrl()}/digests`
   const data = await fetchJson<unknown>(url, { signal })
   return parseDigestList(data)
 }
