@@ -82,7 +82,7 @@ Rationale: cascade delete needs to coordinate both entities; putting that logic 
 - [x] Step 2: Create `entities/llm` (types + api + public API)
   - `getLlms()`, `createLlm()`, `updateLlm()`, `deleteLlm()`
   - Runtime DTO shape validation similar to `entities/llm-config/api`.
-- [ ] Step 3: Create `entities/llm-model` (types + api + public API)
+- [x] Step 3: Create `entities/llm-model` (types + api + public API)
   - `getModelsByLlmId(llmId)`, `createLlmModel()`, `updateLlmModel()`, `deleteLlmModel()`
   - Runtime DTO shape validation.
 - [ ] Step 4: Create `features/llm-management` store
