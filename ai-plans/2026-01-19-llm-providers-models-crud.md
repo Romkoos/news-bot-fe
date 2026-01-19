@@ -79,7 +79,7 @@ Rationale: cascade delete needs to coordinate both entities; putting that logic 
   - [x] Create a new branch from updated `master`
 - [x] Step 1: Add dev proxy routes for new endpoints
   - Add `'/llms'` and `'/llm-models'` to `vite.config.ts` proxy.
-- [ ] Step 2: Create `entities/llm` (types + api + public API)
+- [x] Step 2: Create `entities/llm` (types + api + public API)
   - `getLlms()`, `createLlm()`, `updateLlm()`, `deleteLlm()`
   - Runtime DTO shape validation similar to `entities/llm-config/api`.
 - [ ] Step 3: Create `entities/llm-model` (types + api + public API)
