@@ -96,7 +96,7 @@ Rationale: cascade delete needs to coordinate both entities; putting that logic 
     - On mount: load config + load providers
     - After provider+models are known: set provider/model selection to match config’s `model` (best-effort).
     - When provider changes: refresh models, clear model in form if not available.
-- [ ] Step 6: i18n updates (EN/RU)
+- [x] Step 6: i18n updates (EN/RU)
   - Add keys for provider/model fields and actions (add/delete/confirmations/messages).
 - [ ] Step 7: Manual verification
   - Providers: list/add/delete (including cascade).

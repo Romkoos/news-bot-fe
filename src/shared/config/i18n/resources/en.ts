@@ -18,20 +18,47 @@ export const en = {
   llmConfig: {
     title: 'LLM config',
     fields: {
+      provider: 'Provider',
       model: 'Model',
       instructions: 'Instructions',
       updatedAt: 'Updated at',
     },
     actions: {
+      addProvider: 'Add provider',
+      addModel: 'Add model',
+      delete: 'Delete',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
       save: 'Save',
+    },
+    placeholders: {
+      providerSelect: 'Select a provider',
+      providerName: 'Provider name',
+      providerAlias: 'Provider alias',
+      modelSelect: 'Select a model',
+      modelName: 'Model name',
     },
     validation: {
       modelRequired: 'Please select a model.',
       instructionsRequired: 'Please enter instructions.',
     },
+    confirmations: {
+      providerDelete: 'Delete this provider and all its models?',
+      modelDelete: 'Delete this model?',
+    },
     messages: {
       saved: 'Saved.',
       saveFailed: 'Failed to save.',
+      providerCreateInvalid: 'Please enter provider name and alias.',
+      providerCreated: 'Provider created.',
+      providerCreateFailed: 'Failed to create provider.',
+      providerDeleted: 'Provider deleted.',
+      providerDeleteFailed: 'Failed to delete provider.',
+      modelCreateInvalid: 'Please enter a model name.',
+      modelCreated: 'Model created.',
+      modelCreateFailed: 'Failed to create model.',
+      modelDeleted: 'Model deleted.',
+      modelDeleteFailed: 'Failed to delete model.',
     },
   },
   settings: {
