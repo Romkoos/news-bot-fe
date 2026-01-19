@@ -213,7 +213,11 @@ export function LlmPage(): ReactElement {
   const modelOptions = useMemo(() => {
     const activeModelName = item?.model ?? null
 
-    const options = models.map((m) => ({
+    const options: Array<{
+      readonly value: string
+      readonly label: ReactElement
+      readonly disabled?: boolean
+    }> = models.map((m) => ({
       value: m.name,
       label: (
         <Space style={{ width: '100%', justifyContent: 'space-between' }}>
@@ -242,7 +246,11 @@ export function LlmPage(): ReactElement {
     // Ensure the select can always display the config model, even if it is not present
     // in the models list for the selected provider.
     if (activeModelName && !options.some((o) => o.value === activeModelName)) {
-      options.unshift({ value: activeModelName, label: activeModelName, disabled: true })
+      options.unshift({
+        value: activeModelName,
+        label: <span>{activeModelName}</span>,
+        disabled: true,
+      })
     }
 
     return options
