@@ -40,7 +40,7 @@
   - [x] Update `master`
   - [x] Create a new branch from updated `master`
 - [x] Step 1: Update `features/llm-management` to enforce default provider selection + expose `defaultLlmId`
-- [ ] Step 2: Update `pages/llm/ui/LlmPage.tsx`
+- [x] Step 2: Update `pages/llm/ui/LlmPage.tsx`
   - Disable provider selection UI
   - Model select uses config model name as the source of truth for display
   - Disable delete button for active model

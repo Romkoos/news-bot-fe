@@ -20,7 +20,7 @@ import { useLlmManagementStore } from 'features/llm-management'
 import { formatDateTime } from 'shared/lib'
 
 interface LlmConfigFormValues {
-  readonly modelId: number | null
+  readonly model: string
   readonly instructions: string
 }
 
@@ -40,6 +40,7 @@ export function LlmPage(): ReactElement {
   const llms = useLlmManagementStore((s) => s.llms)
   const llmsStatus = useLlmManagementStore((s) => s.llmsStatus)
   const llmsError = useLlmManagementStore((s) => s.llmsError)
+  const defaultLlmId = useLlmManagementStore((s) => s.defaultLlmId)
   const selectedLlmId = useLlmManagementStore((s) => s.selectedLlmId)
   const models = useLlmManagementStore((s) => s.models)
   const modelsStatus = useLlmManagementStore((s) => s.modelsStatus)
@@ -47,7 +48,6 @@ export function LlmPage(): ReactElement {
   const isMutating = useLlmManagementStore((s) => s.isMutating)
   const mutationError = useLlmManagementStore((s) => s.mutationError)
   const loadLlms = useLlmManagementStore((s) => s.loadLlms)
-  const selectLlm = useLlmManagementStore((s) => s.selectLlm)
   const selectModel = useLlmManagementStore((s) => s.selectModel)
   const addLlm = useLlmManagementStore((s) => s.addLlm)
   const deleteLlmCascade = useLlmManagementStore((s) => s.deleteLlmCascade)
@@ -64,7 +64,7 @@ export function LlmPage(): ReactElement {
 
   useEffect(() => {
     if (item) {
-      form.setFieldsValue({ modelId: null, instructions: item.instructions })
+      form.setFieldsValue({ model: item.model, instructions: item.instructions })
     }
   }, [form, item])
 
@@ -76,31 +76,12 @@ export function LlmPage(): ReactElement {
   const isError = status === 'error'
 
   useEffect(() => {
-    // Keep the form model selection in sync with the selected provider.
-    // When provider changes, models list changes too, so we must clear the model.
-    form.setFieldsValue({ modelId: null })
-    selectModel(null)
-  }, [form, selectModel, selectedLlmId])
-
-  useEffect(() => {
-    const modelId = form.getFieldValue('modelId')
-    if (modelId !== null) {
-      return
-    }
-
-    const modelName = item?.model ?? null
-    if (!modelName) {
-      return
-    }
-
-    const matched = models.find((m) => m.name === modelName) ?? null
-    if (!matched) {
-      return
-    }
-
-    form.setFieldsValue({ modelId: matched.id })
-    selectModel(matched.id)
-  }, [form, item?.model, models, selectModel])
+    // Provider is locked to the default provider (first in list).
+    // Keep selected model in sync with current config model name.
+    const activeModel = item?.model ?? null
+    const matched = activeModel ? (models.find((m) => m.name === activeModel) ?? null) : null
+    selectModel(matched?.id ?? null)
+  }, [item?.model, models, selectModel, selectedLlmId])
 
   const updatedAtLabel = useMemo(() => {
     const formatted = formatDateTime(item?.updatedAt ?? null)
@@ -116,19 +97,15 @@ export function LlmPage(): ReactElement {
     event.stopPropagation()
   }, [])
 
-  const handleProviderChange = useCallback(
-    (llmId: number | null): void => {
-      void selectLlm(llmId)
-      form.setFieldsValue({ modelId: null })
-    },
-    [form, selectLlm],
-  )
+  // Provider selection is locked (first provider in list).
+  const handleProviderChange = useCallback((): void => undefined, [])
 
   const handleModelChange = useCallback(
-    (modelId: number | null): void => {
-      selectModel(modelId)
+    (modelName: string): void => {
+      const matched = models.find((m) => m.name === modelName) ?? null
+      selectModel(matched?.id ?? null)
     },
-    [selectModel],
+    [models, selectModel],
   )
 
   const handleAddProvider = useCallback(async (): Promise<void> => {
@@ -140,29 +117,30 @@ export function LlmPage(): ReactElement {
     }
 
     try {
-      const created = await addLlm({ name, alias })
+      await addLlm({ name, alias })
       setNewProviderName('')
       setNewProviderAlias('')
-      await selectLlm(created.id)
-      form.setFieldsValue({ modelId: null })
-      selectModel(null)
       message.success(t('llmConfig.messages.providerCreated'))
     } catch {
       message.error(t('llmConfig.messages.providerCreateFailed'))
     }
-  }, [addLlm, form, newProviderAlias, newProviderName, selectLlm, selectModel, t])
+  }, [addLlm, newProviderAlias, newProviderName, t])
 
   const handleDeleteProvider = useCallback(
     async (llmId: number): Promise<void> => {
+      // Default provider is not changeable, so deleting it is not allowed.
+      if (llmId === defaultLlmId) {
+        return
+      }
+
       try {
         await deleteLlmCascade(llmId)
-        form.setFieldsValue({ modelId: null })
         message.success(t('llmConfig.messages.providerDeleted'))
       } catch {
         message.error(t('llmConfig.messages.providerDeleteFailed'))
       }
     },
-    [deleteLlmCascade, form, t],
+    [defaultLlmId, deleteLlmCascade, t],
   )
 
   const handleAddModel = useCallback(async (): Promise<void> => {
@@ -175,7 +153,7 @@ export function LlmPage(): ReactElement {
     try {
       const created = await addModel({ name })
       setNewModelName('')
-      form.setFieldsValue({ modelId: created.id })
+      form.setFieldsValue({ model: created.name })
       selectModel(created.id)
       message.success(t('llmConfig.messages.modelCreated'))
     } catch {
@@ -185,24 +163,26 @@ export function LlmPage(): ReactElement {
 
   const handleDeleteModel = useCallback(
     async (modelId: number): Promise<void> => {
-      const currentModelId = form.getFieldValue('modelId')
+      const activeModelName = item?.model ?? null
+      const model = models.find((m) => m.id === modelId) ?? null
+      if (activeModelName !== null && model?.name === activeModelName) {
+        return
+      }
+
       try {
         await deleteModel(modelId)
-        if (currentModelId === modelId) {
-          form.setFieldsValue({ modelId: null })
-          selectModel(null)
-        }
         message.success(t('llmConfig.messages.modelDeleted'))
       } catch {
         message.error(t('llmConfig.messages.modelDeleteFailed'))
       }
     },
-    [deleteModel, form, selectModel, t],
+    [deleteModel, item?.model, models, t],
   )
 
   const providerOptions = useMemo(() => {
     return llms.map((llm) => ({
       value: llm.id,
+      disabled: defaultLlmId !== null ? llm.id !== defaultLlmId : false,
       label: (
         <Space style={{ width: '100%', justifyContent: 'space-between' }}>
           <span>
@@ -213,13 +193,14 @@ export function LlmPage(): ReactElement {
             okText={t('llmConfig.actions.confirm')}
             cancelText={t('llmConfig.actions.cancel')}
             onConfirm={() => void handleDeleteProvider(llm.id)}
+            disabled={isMutating || llm.id === defaultLlmId}
           >
             <Button
               danger
               size="small"
               onMouseDown={handlePreventSelectMouseDown}
               onClick={handlePreventSelectMouseDown}
-              disabled={isMutating}
+              disabled={isMutating || llm.id === defaultLlmId}
             >
               {t('llmConfig.actions.delete')}
             </Button>
@@ -227,11 +208,13 @@ export function LlmPage(): ReactElement {
         </Space>
       ),
     }))
-  }, [handleDeleteProvider, handlePreventSelectMouseDown, isMutating, llms, t])
+  }, [defaultLlmId, handleDeleteProvider, handlePreventSelectMouseDown, isMutating, llms, t])
 
   const modelOptions = useMemo(() => {
-    return models.map((m) => ({
-      value: m.id,
+    const activeModelName = item?.model ?? null
+
+    const options = models.map((m) => ({
+      value: m.name,
       label: (
         <Space style={{ width: '100%', justifyContent: 'space-between' }}>
           <span>{m.name}</span>
@@ -240,13 +223,14 @@ export function LlmPage(): ReactElement {
             okText={t('llmConfig.actions.confirm')}
             cancelText={t('llmConfig.actions.cancel')}
             onConfirm={() => void handleDeleteModel(m.id)}
+            disabled={isMutating || (activeModelName !== null && m.name === activeModelName)}
           >
             <Button
               danger
               size="small"
               onMouseDown={handlePreventSelectMouseDown}
               onClick={handlePreventSelectMouseDown}
-              disabled={isMutating}
+              disabled={isMutating || (activeModelName !== null && m.name === activeModelName)}
             >
               {t('llmConfig.actions.delete')}
             </Button>
@@ -254,25 +238,26 @@ export function LlmPage(): ReactElement {
         </Space>
       ),
     }))
-  }, [handleDeleteModel, handlePreventSelectMouseDown, isMutating, models, t])
+
+    // Ensure the select can always display the config model, even if it is not present
+    // in the models list for the selected provider.
+    if (activeModelName && !options.some((o) => o.value === activeModelName)) {
+      options.unshift({ value: activeModelName, label: activeModelName, disabled: true })
+    }
+
+    return options
+  }, [handleDeleteModel, handlePreventSelectMouseDown, isMutating, item?.model, models, t])
 
   const handleSave = useCallback(
     async (values: LlmConfigFormValues): Promise<void> => {
-      const selectedModelId = values.modelId
-      const selectedModel = models.find((m) => m.id === selectedModelId) ?? null
-      if (!selectedModel) {
-        message.error(t('llmConfig.messages.saveFailed'))
-        return
-      }
-
       try {
-        await save({ model: selectedModel.name, instructions: values.instructions })
+        await save({ model: values.model, instructions: values.instructions })
         message.success(t('llmConfig.messages.saved'))
       } catch {
         message.error(t('llmConfig.messages.saveFailed'))
       }
     },
-    [models, save, t],
+    [save, t],
   )
 
   if (isInitialLoading) {
@@ -324,11 +309,10 @@ export function LlmPage(): ReactElement {
         >
           <Form.Item label={t('llmConfig.fields.provider')}>
             <Select
-              value={selectedLlmId}
+              value={defaultLlmId ?? selectedLlmId}
               onChange={handleProviderChange}
               loading={llmsStatus === 'loading'}
               options={providerOptions}
-              allowClear
               placeholder={t('llmConfig.placeholders.providerSelect')}
               dropdownRender={(menu) => (
                 <div>
@@ -362,7 +346,7 @@ export function LlmPage(): ReactElement {
 
           <Form.Item<LlmConfigFormValues>
             label={t('llmConfig.fields.model')}
-            name="modelId"
+            name="model"
             rules={[{ required: true, message: t('llmConfig.validation.modelRequired') }]}
           >
             <Select
@@ -370,7 +354,6 @@ export function LlmPage(): ReactElement {
               options={modelOptions}
               disabled={selectedLlmId === null}
               loading={modelsStatus === 'loading'}
-              allowClear
               placeholder={t('llmConfig.placeholders.modelSelect')}
               dropdownRender={(menu) => (
                 <div>
