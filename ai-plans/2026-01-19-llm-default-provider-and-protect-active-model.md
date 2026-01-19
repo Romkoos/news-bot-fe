@@ -45,10 +45,19 @@
   - Model select uses config model name as the source of truth for display
   - Disable delete button for active model
 - [ ] Step 3: i18n (if new strings are needed)
-- [ ] Step 4: Manual verification in browser
+- [x] Step 4: Manual verification in browser
   - Provider is locked to first item
   - Model shows config model
   - Active model delete is disabled
+
+## Completed
+
+- Date completed: 2026-01-19
+- Notes:
+  - Manual verification confirmed:
+    - Provider defaults to the first provider and cannot be switched.
+    - Model value is sourced from `llm-config.model`.
+    - Delete is disabled for the active model and enabled for other models.
 
 ## Files to Modify/Create
 
