@@ -1,11 +1,10 @@
 import type { ReactElement } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { DigestDto } from '../types'
 
 import { DigestCard } from './DigestCard'
 import styles from './DigestCardList.module.css'
-
-import { LazyMount } from 'shared/ui'
 
 export interface DigestCardListLazyRendering {
   /**
@@ -23,8 +22,14 @@ export interface DigestCardListLazyRendering {
    */
   readonly initialRenderCount?: number
   /**
+   * How many additional cards to mount on each "near bottom" intersection.
+   *
+   * @default 6
+   */
+  readonly batchSize?: number
+  /**
    * IntersectionObserver root margin used to mount cards slightly before they
-   * become visible.
+   * become visible (when the list bottom approaches the viewport).
    *
    * @default '200px 0px'
    */
@@ -54,21 +59,72 @@ export function DigestCardList(props: DigestCardListProps): ReactElement {
 
   const isLazy = lazyRendering?.enabled === true
   const initialRenderCount = lazyRendering?.initialRenderCount ?? 0
-  const rootMargin = lazyRendering?.rootMargin
+  const batchSize = lazyRendering?.batchSize ?? 6
+  const rootMargin = lazyRendering?.rootMargin ?? '200px 0px'
 
-  return (
-    <div className={styles.root}>
-      {items.map((item, idx) => {
-        if (!isLazy || idx < initialRenderCount) {
-          return <DigestCard key={item.id} item={item} onInfoClick={onInfoClick} />
+  const canUseObserver = useMemo(() => {
+    return typeof window !== 'undefined' && 'IntersectionObserver' in window
+  }, [])
+
+  const [sentinel, setSentinel] = useState<HTMLDivElement | null>(null)
+  const [visibleCount, setVisibleCount] = useState<number>(() => initialRenderCount)
+
+  const setSentinelRef = useCallback((node: HTMLDivElement | null): void => {
+    setSentinel(node)
+  }, [])
+
+  const renderedItems = useMemo(() => {
+    if (!isLazy || !canUseObserver) {
+      return items
+    }
+    return items.slice(0, Math.max(0, Math.min(visibleCount, items.length)))
+  }, [canUseObserver, isLazy, items, visibleCount])
+
+  const shouldObserveMore = isLazy && canUseObserver && renderedItems.length < items.length
+
+  useEffect(() => {
+    if (!shouldObserveMore) {
+      return
+    }
+
+    if (!sentinel) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry?.isIntersecting) {
+          return
         }
 
-        return (
-          <LazyMount key={item.id} rootMargin={rootMargin}>
-            <DigestCard item={item} onInfoClick={onInfoClick} />
-          </LazyMount>
-        )
-      })}
+        // Disconnect to avoid repeated rapid-fire triggers; effect will reattach if needed.
+        observer.disconnect()
+
+        setVisibleCount((current) => {
+          const next = current + batchSize
+          return next >= items.length ? items.length : next
+        })
+      },
+      { rootMargin },
+    )
+
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [batchSize, items.length, rootMargin, sentinel, shouldObserveMore])
+
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.root}>
+        {renderedItems.map((item) => (
+          <DigestCard key={item.id} item={item} onInfoClick={onInfoClick} />
+        ))}
+      </div>
+
+      {shouldObserveMore ? <div ref={setSentinelRef} className={styles.sentinel} /> : null}
     </div>
   )
 }

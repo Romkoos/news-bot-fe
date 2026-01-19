@@ -1,7 +1,15 @@
+.wrapper {
+  width: 100%;
+}
+
 .root {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
+}
+
+.sentinel {
+  height: 1px;
 }
 
 @media (min-width: 768px) {
