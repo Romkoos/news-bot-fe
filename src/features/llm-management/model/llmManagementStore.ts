@@ -12,6 +12,13 @@ export interface LlmManagementStore {
   readonly llmsStatus: LlmManagementStatus
   readonly llmsError: string | null
 
+  /**
+   * The “default” provider id (first item in `llms`, if present).
+   *
+   * UI and consumers should treat this provider as non-changeable.
+   */
+  readonly defaultLlmId: number | null
+
   readonly selectedLlmId: number | null
 
   readonly models: LlmModelDto[]
@@ -95,6 +102,7 @@ export const useLlmManagementStore = create<LlmManagementStore>((set, get) => ({
   llms: [],
   llmsStatus: 'idle',
   llmsError: null,
+  defaultLlmId: null,
   selectedLlmId: null,
   models: [],
   modelsStatus: 'idle',
@@ -126,14 +134,13 @@ export const useLlmManagementStore = create<LlmManagementStore>((set, get) => ({
         return
       }
 
+      const defaultLlmId = llms.length > 0 ? (llms[0]?.id ?? null) : null
       lastLlmsLoadedAtMs = Date.now()
-      set({ llms, llmsStatus: 'success', llmsError: null })
+      set({ llms, llmsStatus: 'success', llmsError: null, defaultLlmId })
 
-      const selectedLlmId = get().selectedLlmId
-      if (selectedLlmId !== null && !llms.some((l) => l.id === selectedLlmId)) {
-        // Selection became invalid after reload.
-        await get().selectLlm(null)
-      }
+      // Enforce “default provider = first in list” and keep it non-changeable.
+      // This also means that if backend ordering changes, the default provider changes accordingly.
+      await get().selectLlm(defaultLlmId)
     } catch (error) {
       if (requestSignal.aborted) {
         return
@@ -142,24 +149,29 @@ export const useLlmManagementStore = create<LlmManagementStore>((set, get) => ({
     }
   },
   selectLlm: async (llmId) => {
+    const defaultLlmId = get().defaultLlmId
+    const enforcedId = defaultLlmId ?? llmId
+    // When default provider exists, disallow switching away from it (including clearing).
+    const nextId = defaultLlmId !== null ? defaultLlmId : enforcedId
+
     set({
-      selectedLlmId: llmId,
+      selectedLlmId: nextId,
       models: [],
-      modelsStatus: llmId === null ? 'idle' : 'loading',
+      modelsStatus: nextId === null ? 'idle' : 'loading',
       modelsError: null,
       selectedModelId: null,
     })
 
-    if (llmId === null) {
+    if (nextId === null) {
       return
     }
 
-    const lastLoadedAt = lastModelsLoadedAtByLlmId.get(llmId) ?? null
+    const lastLoadedAt = lastModelsLoadedAtByLlmId.get(nextId) ?? null
     const isFresh =
       lastLoadedAt !== null &&
       Date.now() - lastLoadedAt < STALE_TIME_MS &&
       get().modelsStatus === 'success' &&
-      get().selectedLlmId === llmId
+      get().selectedLlmId === nextId
     if (isFresh) {
       return
     }
@@ -172,17 +184,17 @@ export const useLlmManagementStore = create<LlmManagementStore>((set, get) => ({
 
     set({ modelsStatus: 'loading', modelsError: null })
     try {
-      const models = await getModelsByLlmId(llmId, requestSignal)
+      const models = await getModelsByLlmId(nextId, requestSignal)
       if (requestSignal.aborted) {
         return
       }
 
       // Guard against race: selection changed while request was in flight.
-      if (get().selectedLlmId !== llmId) {
+      if (get().selectedLlmId !== nextId) {
         return
       }
 
-      lastModelsLoadedAtByLlmId.set(llmId, Date.now())
+      lastModelsLoadedAtByLlmId.set(nextId, Date.now())
       set({ models, modelsStatus: 'success', modelsError: null })
     } catch (error) {
       if (requestSignal.aborted) {
