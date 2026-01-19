@@ -1,6 +1,6 @@
 import type { DigestDto } from '../types'
 
-import { fetchJson, getApiBaseUrl } from 'shared/api'
+import { fetchJson } from 'shared/api'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -46,12 +46,6 @@ function parseDigestList(payload: unknown): DigestDto[] {
  * - Network request.
  */
 export async function fetchDigests(signal?: AbortSignal): Promise<DigestDto[]> {
-  /**
-   * In dev, route requests through the Vite proxy to avoid CORS issues.
-   *
-   * See `vite.config.ts` `server.proxy['/digests']`.
-   */
-  const url = import.meta.env.DEV ? '/digests' : `${getApiBaseUrl()}/digests`
-  const data = await fetchJson<unknown>(url, { signal })
+  const data = await fetchJson<unknown>('/digests', { signal })
   return parseDigestList(data)
 }
