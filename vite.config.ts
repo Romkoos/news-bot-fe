@@ -47,6 +47,16 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        '/llms': {
+          target: apiBaseUrl,
+          changeOrigin: true,
+          secure: false,
+        },
+        '/llm-models': {
+          target: apiBaseUrl,
+          changeOrigin: true,
+          secure: false,
+        },
         '/news-items': {
           target: apiBaseUrl,
           changeOrigin: true,
