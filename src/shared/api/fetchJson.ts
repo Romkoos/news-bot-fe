@@ -60,6 +60,12 @@ export async function fetchJson<T>(
     throw new HttpError({ status: response.status, url, responseText })
   }
 
+  // Some endpoints (commonly DELETE) can return 204 No Content on success.
+  // In that case, there is no JSON to parse.
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   try {
     return (await response.json()) as T
   } catch (error) {
