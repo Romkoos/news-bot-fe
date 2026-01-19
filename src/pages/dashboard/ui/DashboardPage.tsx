@@ -56,7 +56,10 @@ export function DashboardPage(): ReactElement {
         {t('nav.dashboard')}
       </Typography.Title>
 
-      <DigestListWithDetails items={items} />
+      <DigestListWithDetails
+        items={items}
+        cardListLazyRendering={{ enabled: true, initialRenderCount: 6 }}
+      />
     </div>
   )
 }
