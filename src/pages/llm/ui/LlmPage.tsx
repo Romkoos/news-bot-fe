@@ -76,6 +76,13 @@ export function LlmPage(): ReactElement {
   const isError = status === 'error'
 
   useEffect(() => {
+    // Keep the form model selection in sync with the selected provider.
+    // When provider changes, models list changes too, so we must clear the model.
+    form.setFieldsValue({ modelId: null })
+    selectModel(null)
+  }, [form, selectModel, selectedLlmId])
+
+  useEffect(() => {
     const modelId = form.getFieldValue('modelId')
     if (modelId !== null) {
       return
@@ -119,10 +126,9 @@ export function LlmPage(): ReactElement {
 
   const handleModelChange = useCallback(
     (modelId: number | null): void => {
-      form.setFieldsValue({ modelId })
       selectModel(modelId)
     },
-    [form, selectModel],
+    [selectModel],
   )
 
   const handleAddProvider = useCallback(async (): Promise<void> => {
@@ -138,11 +144,13 @@ export function LlmPage(): ReactElement {
       setNewProviderName('')
       setNewProviderAlias('')
       await selectLlm(created.id)
+      form.setFieldsValue({ modelId: null })
+      selectModel(null)
       message.success(t('llmConfig.messages.providerCreated'))
     } catch {
       message.error(t('llmConfig.messages.providerCreateFailed'))
     }
-  }, [addLlm, newProviderAlias, newProviderName, selectLlm, t])
+  }, [addLlm, form, newProviderAlias, newProviderName, selectLlm, selectModel, t])
 
   const handleDeleteProvider = useCallback(
     async (llmId: number): Promise<void> => {
@@ -358,7 +366,6 @@ export function LlmPage(): ReactElement {
             rules={[{ required: true, message: t('llmConfig.validation.modelRequired') }]}
           >
             <Select
-              value={form.getFieldValue('modelId')}
               onChange={handleModelChange}
               options={modelOptions}
               disabled={selectedLlmId === null}
