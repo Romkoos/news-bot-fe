@@ -80,7 +80,8 @@ export function DigestCardList(props: DigestCardListProps): ReactElement {
     return items.slice(0, Math.max(0, Math.min(visibleCount, items.length)))
   }, [canUseObserver, isLazy, items, visibleCount])
 
-  const shouldObserveMore = isLazy && canUseObserver && renderedItems.length < items.length
+  const renderedCount = renderedItems.length
+  const shouldObserveMore = isLazy && canUseObserver && renderedCount < items.length
 
   useEffect(() => {
     if (!shouldObserveMore) {
@@ -114,7 +115,7 @@ export function DigestCardList(props: DigestCardListProps): ReactElement {
     return () => {
       observer.disconnect()
     }
-  }, [batchSize, items.length, rootMargin, sentinel, shouldObserveMore])
+  }, [batchSize, items.length, renderedCount, rootMargin, sentinel, shouldObserveMore])
 
   return (
     <div className={styles.wrapper}>
