@@ -43,7 +43,13 @@ function parseLlmModel(payload: unknown): LlmModelDto {
 }
 
 export interface CreateLlmModelPayload {
-  readonly llm_id: number
+  /**
+   * Parent LLM provider id.
+   *
+   * Note: the backend expects `llmId` in the create payload (camelCase),
+   * while responses use `llm_id` (snake_case) in `LlmModelDto`.
+   */
+  readonly llmId: number
   readonly name: string
 }
 

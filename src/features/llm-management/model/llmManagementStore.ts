@@ -240,7 +240,7 @@ export const useLlmManagementStore = create<LlmManagementStore>((set, get) => ({
 
     set({ isMutating: true, mutationError: null })
     try {
-      const created = await createLlmModel({ llm_id: llmId, name })
+      const created = await createLlmModel({ llmId, name })
       // Reload models for the same provider.
       lastModelsLoadedAtByLlmId.delete(llmId)
       await get().selectLlm(llmId)
