@@ -26,7 +26,16 @@ Reduce initial render cost on `Dashboard` by **mounting only the first 6 digest 
 - [x] Step 1: Add `shared/ui/lazy-mount` primitive (IntersectionObserver-based)
 - [x] Step 2: Extend `entities/digest/ui/DigestCardList` to support lazy-mounting after N items
 - [x] Step 3: Wire lazy rendering from `pages/dashboard` via `widgets/digest-list-with-details` (set initialRenderCount=6)
-- [ ] Step 4: Validate behavior (desktop shows 6 real cards immediately; scrolling mounts the rest) and update docs if needed
+- [x] Step 4: Validate behavior (desktop shows 6 real cards immediately; scrolling mounts the rest) and update docs if needed
+
+## Completed
+
+- Date completed: 2026-01-19
+- Deviations:
+  - The initial implementation used per-card wrappers (which created empty grid cells).
+  - Switched to incremental rendering (sentinel-based) to ensure **no placeholder tiles** are rendered.
+- Follow-ups:
+  - Consider exposing `batchSize` for dashboard if we want to tune how many cards are appended per scroll.
 
 ## Files to Modify/Create
 
