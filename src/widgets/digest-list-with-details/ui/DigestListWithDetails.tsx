@@ -3,16 +3,23 @@ import { useCallback, useState } from 'react'
 
 import styles from './DigestListWithDetails.module.css'
 
-import type { DigestDto } from 'entities/digest'
+import type { DigestDto, DigestCardListProps } from 'entities/digest'
 import { DigestCardList } from 'entities/digest'
 import { DigestDetailsDrawerContainer } from 'features/digest-details'
 
 export interface DigestListWithDetailsProps {
   readonly items: readonly DigestDto[]
+  /**
+   * Optional performance config for the underlying digest card list.
+   *
+   * This is passed through to `entities/digest` and should be controlled by
+   * route-level composition.
+   */
+  readonly cardListLazyRendering?: DigestCardListProps['lazyRendering']
 }
 
 export function DigestListWithDetails(props: DigestListWithDetailsProps): ReactElement {
-  const { items } = props
+  const { cardListLazyRendering, items } = props
 
   const [selected, setSelected] = useState<DigestDto | null>(null)
   const [open, setOpen] = useState(false)
@@ -28,7 +35,11 @@ export function DigestListWithDetails(props: DigestListWithDetailsProps): ReactE
 
   return (
     <div className={styles.root}>
-      <DigestCardList items={items} onInfoClick={handleInfoClick} />
+      <DigestCardList
+        items={items}
+        onInfoClick={handleInfoClick}
+        lazyRendering={cardListLazyRendering}
+      />
       <DigestDetailsDrawerContainer open={open} digest={selected} onClose={handleClose} />
     </div>
   )

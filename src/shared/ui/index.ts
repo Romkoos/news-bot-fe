@@ -3,4 +3,4 @@
  *
  * Contains domain-agnostic UI primitives and layout helpers.
  */
-export {}
+export * from './lazy-mount'

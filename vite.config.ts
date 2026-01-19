@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     env.API_BASE_URL || env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL,
   )
   // `apiBaseUrl` includes `/api` and is used as the proxy target for endpoints below.
+  const apiOrigin = apiBaseUrl.endsWith('/api') ? apiBaseUrl.slice(0, -'/api'.length) : apiBaseUrl
 
   return {
     plugins: [react()],
@@ -42,6 +43,16 @@ export default defineConfig(({ mode }) => {
        * The client can fetch `/digests` from the Vite origin, and Vite forwards it to the API.
        */
       proxy: {
+        /**
+         * Proxy the entire API namespace.
+         *
+         * The client will call `/api/...` (same-origin), and Vite forwards it to the backend origin.
+         */
+        '/api': {
+          target: apiOrigin,
+          changeOrigin: true,
+          secure: false,
+        },
         '/digests': {
           target: apiBaseUrl,
           changeOrigin: true,

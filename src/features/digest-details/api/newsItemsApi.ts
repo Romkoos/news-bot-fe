@@ -1,6 +1,6 @@
 import type { NewsItemDto } from './types'
 
-import { fetchJson, getApiBaseUrl } from 'shared/api'
+import { fetchJson } from 'shared/api'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -61,8 +61,6 @@ export async function fetchNewsItemsByIds(
   }
 
   // Keep the query simple and deterministic: `ids=110,111,112`.
-  const baseUrl = getApiBaseUrl()
-  const url = `${baseUrl}/news-items/by-ids?ids=${ids.join(',')}`
-  const data = await fetchJson<unknown>(url, { signal })
+  const data = await fetchJson<unknown>(`/news-items/by-ids?ids=${ids.join(',')}`, { signal })
   return parseNewsItems(data)
 }
