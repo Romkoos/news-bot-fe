@@ -98,11 +98,19 @@ Rationale: cascade delete needs to coordinate both entities; putting that logic 
     - When provider changes: refresh models, clear model in form if not available.
 - [x] Step 6: i18n updates (EN/RU)
   - Add keys for provider/model fields and actions (add/delete/confirmations/messages).
-- [ ] Step 7: Manual verification
+- [x] Step 7: Manual verification
   - Providers: list/add/delete (including cascade).
   - Models: list/add/delete scoped to provider.
   - Provider change updates models list and selection.
   - Config save still works (model name + instructions).
+
+## Completed
+
+- Date completed: 2026-01-19
+- Deviations:
+  - Backend expects `llmId` (camelCase) for model creation payload (`POST /api/llm-models`), while model DTO uses `llm_id` in responses.
+  - Backend returns `204 No Content` for some successful DELETE operations; `shared/api/fetchJson` was updated to treat HTTP 204 as a valid “no body” success.
+  - Added a UI sync fix so the model selection is cleared whenever the selected provider changes (including when provider selection is set programmatically after creating a provider).
 
 ## Files to Modify/Create
 
